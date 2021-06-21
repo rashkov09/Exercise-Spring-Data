@@ -7,7 +7,7 @@ public class Test {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
       DbHandler handler = new DbHandler();
-      handler.setProperties("dobrin_r","D0brin-r");
+      handler.setProperties("test","test");
       handler.setConnection();
       String salary = sc.nextLine();
       handler.setStatement("SELECT * FROM employees WHERE salary >"+ Double.parseDouble(salary));
