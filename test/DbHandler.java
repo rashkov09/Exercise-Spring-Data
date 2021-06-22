@@ -1,27 +1,32 @@
+package test;
 import java.sql.*;
 import java.util.Properties;
 
 public class DbHandler implements Handle{
+    private final String database;
     private Connection connection;
     private Properties properties;
     private PreparedStatement stmt;
 
-    public DbHandler() {
+    public DbHandler(String database) {
+        this.database = database;
+        setProperties();
+        setConnection();
     }
 
 
-    @Override
-    public void setProperties(String username, String password) {
+
+    private void setProperties() {
         this.properties = new Properties();
-        this.properties.setProperty("user", username);
-        this.properties.setProperty("password",password);
+        this.properties.setProperty("user", "test");
+        this.properties.setProperty("password","D12345-dD");
 
     }
 
-    @Override
-    public void setConnection() {
+
+    private void setConnection() {
         try {
-            this.connection = DriverManager.getConnection("jdbc:mysql://79.132.12.253:3306/soft_uni",this.properties);
+            this.connection = DriverManager.getConnection("jdbc:mysql://79.132.12.253:3306/"+this.database,this.properties);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -40,10 +45,15 @@ public class DbHandler implements Handle{
     public ResultSet execute() {
         ResultSet rs = null;
         try {
-            rs = stmt.executeQuery();
+            rs = this.stmt.executeQuery();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
         return rs ;
+    }
+
+    @Override
+    public PreparedStatement getStatement() {
+        return this.stmt;
     }
 }

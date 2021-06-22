@@ -1,4 +1,4 @@
-import java.io.InputStream;
+import test.DbHandler;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -6,13 +6,13 @@ import java.util.Scanner;
 public class Test {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-      DbHandler handler = new DbHandler();
-      handler.setProperties("test","test");
-      handler.setConnection();
+      DbHandler handler = new DbHandler("soft_uni");
+      handler.setStatement("SELECT * FROM employees WHERE salary > ?");
       String salary = sc.nextLine();
-      handler.setStatement("SELECT * FROM employees WHERE salary >"+ Double.parseDouble(salary));
-        ResultSet rs = handler.execute();
+
         try {
+            handler.getStatement().setDouble(1,Double.parseDouble(salary));
+            ResultSet rs = handler.execute();
             while (rs.next()) {
                 System.out.printf("%s %s%n",
                         rs.getString("first_name"),
