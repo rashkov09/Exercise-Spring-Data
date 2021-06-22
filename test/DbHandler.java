@@ -53,6 +53,15 @@ public class DbHandler implements Handle{
     }
 
     @Override
+    public int executeUpdate() {
+        try {
+            return  this.stmt.executeUpdate();
+        }catch (SQLException e){
+            return -1;
+        }
+    }
+
+    @Override
     public PreparedStatement getStatement() {
         return this.stmt;
     }
