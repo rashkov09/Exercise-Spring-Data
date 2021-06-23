@@ -7,6 +7,7 @@ public class DbHandler implements Handle{
     private Connection connection;
     private Properties properties;
     private PreparedStatement stmt;
+    private CallableStatement callableStatement;
 
     public DbHandler(String database) {
         this.database = database;
@@ -27,6 +28,7 @@ public class DbHandler implements Handle{
     private void setConnection() {
         try {
             this.connection = DriverManager.getConnection("jdbc:mysql://79.132.12.253:3306/"+this.database,this.properties);
+            this.connection.setAutoCommit(false);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -42,10 +44,30 @@ public class DbHandler implements Handle{
     }
 
     @Override
+    public void setCallableStatement(String query) {
+        try {
+            this.callableStatement = this.connection.prepareCall(query);
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public ResultSet execute() {
         ResultSet rs = null;
         try {
             rs = this.stmt.executeQuery();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return rs ;
+    }
+
+    @Override
+    public ResultSet executeCall() {
+        ResultSet rs = null;
+        try {
+            rs = this.callableStatement.executeQuery();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -64,5 +86,29 @@ public class DbHandler implements Handle{
     @Override
     public PreparedStatement getStatement() {
         return this.stmt;
+    }
+
+    @Override
+    public CallableStatement getCallableStatement() {
+        return this.callableStatement;
+    }
+
+
+    @Override
+    public void commit() {
+        try {
+            this.connection.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void rollback() {
+        try {
+            this.connection.rollback();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

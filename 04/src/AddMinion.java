@@ -22,16 +22,19 @@ public class AddMinion {
             }
         }
         Handle handler = new DbHandler("minions_db");
-
-        addMinionIfNotExists(minionName, minionAge, handler);
-        addTownIfNotExists(minionTown, handler);
-        addVillainIfNotExists(villainName, handler);
-        addMinionToVillain(minionName, villainName, handler);
-
+        try {
+            addMinionIfNotExists(minionName, minionAge, handler);
+            addTownIfNotExists(minionTown, handler);
+            addVillainIfNotExists(villainName, handler);
+            addMinionToVillain(minionName, villainName, handler);
+            handler.commit();
+        }catch (SQLException e){
+            handler.rollback();
+            System.out.println(e.getMessage());
+        }
     }
 
-    private static void addMinionToVillain(String minionName, String villainName, Handle handler) {
-        try {
+    private static void addMinionToVillain(String minionName, String villainName, Handle handler) throws SQLException {
             handler.setStatement("INSERT INTO minions_villains(minion_id,villain_id)\n" +
                     "SELECT (\n" +
                     "SELECT m.id\n" +
@@ -46,62 +49,50 @@ public class AddMinion {
             if (result > 0) {
                 System.out.printf("Successfully added %s to be minion of %s.%n", minionName, villainName);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
-    private static void addMinionIfNotExists(String minionName, int minionAge, Handle handler) {
+    private static void addMinionIfNotExists(String minionName, int minionAge, Handle handler) throws SQLException {
         handler.setStatement("INSERT INTO minions (`name`,`age`)\n" +
                 "SELECT ? , ?\n" +
                 "WHERE NOT EXISTS (\n" +
                 "SELECT minions.`name`\n" +
                 "FROM minions\n" +
                 "WHERE minions.`name` = ?);");
-        try {
+
             handler.getStatement().setString(1, minionName);
             handler.getStatement().setInt(2, minionAge);
             handler.getStatement().setString(3, minionName);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
-    private static void addVillainIfNotExists(String villainName, Handle handler) {
+    private static void addVillainIfNotExists(String villainName, Handle handler) throws SQLException {
         handler.setStatement("INSERT INTO villains (`name`,`evilness_factor`)\n" +
                 "SELECT (?), 'evil'\n" +
                 "WHERE NOT EXISTS (\n" +
                 "SELECT villains.`name`\n" +
                 "FROM villains\n" +
                 "WHERE villains.`name` = ?);");
-        try {
+
             handler.getStatement().setString(1, villainName);
             handler.getStatement().setString(2, villainName);
             int result = handler.executeUpdate();
             if (result > 0) {
                 System.out.printf("Villain %s was added to the database.%n", villainName);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
-    private static void addTownIfNotExists(String minionTown, Handle handler) {
+    private static void addTownIfNotExists(String minionTown, Handle handler) throws SQLException {
         handler.setStatement("INSERT INTO towns (`name`)\n" +
                 "SELECT (?)\n" +
                 "WHERE NOT EXISTS (\n" +
                 "SELECT towns.`name`\n" +
                 "FROM towns\n" +
                 "WHERE towns.`name` = ?);");
-        try {
+
             handler.getStatement().setString(1, minionTown);
             handler.getStatement().setString(2, minionTown);
             int result = handler.executeUpdate();
             if (result > 0) {
                 System.out.printf("Town %s was added to the database.%n", minionTown);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 }
